@@ -1,0 +1,31 @@
+parameters:
+    - name: testEnv
+      type: string
+
+steps:
+
+  #Maven Run test
+  - task: Maven@3
+    displayName: Run Tests
+    continueOnError: true
+    inputs:
+      mavenPomFile: 'testautomation/pom.xml'
+      options: 'clean install -Denvironment=${{ parameters.testEnv }} -Dfailsafe.rerunFailingTestsCount=2'
+      publishJUnitResults: true
+      testResultsFiles: 'testautomation/target/site/serenity/SERENITY-JUNIT-*.xml'
+      testRunTitle: 'Automation'
+      javaHomeOption: 'JDKVersion'
+      mavenVersionOption: 'Default'
+      mavenAuthenticateFeed: false
+      effectivePomSkip: false
+      sonarQubeRunAnalysis: true
+      sqMavenPluginVersionChoice: 'latest'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: 'testautomation/target/site/serenity/SERENITY-JUNIT-*.xml'
+      searchFolder: '$(System.DefaultWorkingDirectory)/test-results'
+      failTaskOnFailedTests: true
+    displayName: 'Publish Test Results'
+    condition: always()
