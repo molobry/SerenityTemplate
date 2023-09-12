@@ -1,9 +1,10 @@
 package mol;
 
 import net.serenitybdd.core.webdriver.enhancers.BeforeAWebdriverScenario;
-import net.thucydides.core.model.TestOutcome;
-import net.thucydides.core.util.EnvironmentVariables;
+
 import net.thucydides.core.webdriver.SupportedWebDriver;
+import net.thucydides.model.domain.TestOutcome;
+import net.thucydides.model.util.EnvironmentVariables;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
