@@ -1,0 +1,14 @@
+public void ConfigureAditionalInputIfRunningRemoteWebDriver(WebElement inputPath) {
+        String remoteDriver = EnvironmentSpecificConfiguration.from(environmentVariables).getProperty("webdriver.driver");
+        if(remoteDriver.equalsIgnoreCase("remote")) {
+            ((RemoteWebElement)inputPath).setFileDetector(new LocalFileDetector());
+        }
+    }
+
+    @And("User add picture named {string}")
+    public void userAddPictureNamed(String imageName) {
+        File file = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "images" + File.separator + imageName +".png");
+        WebElement inputPath = getDriver().findElement(By.xpath("//input[@id='icon-button-file']"));
+        ConfigureAditionalInputIfRunningRemoteWebDriver(inputPath);
+        inputPath.sendKeys(file.getAbsolutePath());
+    }
