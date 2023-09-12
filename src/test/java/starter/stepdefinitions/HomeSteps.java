@@ -13,7 +13,7 @@ import starter.pages.HomePage;
 import static starter.stepdefinitions.Hooks.*;
 
 public class HomeSteps extends PageObject {
-a
+
     HomePage homePage = new HomePage();
     DashboardPage dashboardPage = new DashboardPage();
 
