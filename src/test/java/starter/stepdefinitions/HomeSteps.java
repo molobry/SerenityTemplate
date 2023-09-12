@@ -13,8 +13,7 @@ import starter.pages.HomePage;
 import static starter.stepdefinitions.Hooks.*;
 
 public class HomeSteps extends PageObject {
-    private EnvironmentVariables env;
-
+a
     HomePage homePage = new HomePage();
     DashboardPage dashboardPage = new DashboardPage();
 
@@ -22,6 +21,7 @@ public class HomeSteps extends PageObject {
     @Given("User navigate to OrangeHRM page")
     public void userNavigateToOrangeHRMPage() {
         getDriver().navigate().to(baseUrl);
+        homePage.usernameInput.waitUntilVisible();
     }
 
     @And("User login with Admin credentials")
@@ -33,6 +33,6 @@ public class HomeSteps extends PageObject {
 
     @Then("User is logged in and see Dashboard page")
     public void userIsLoggedInAndSeeDashboardPage() {
-        dashboardPage.dashboardTopLabel.shouldNotBeVisible();
+        dashboardPage.dashboardTopLabel.shouldBeVisible();
     }
 }

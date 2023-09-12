@@ -7,7 +7,7 @@ import net.thucydides.model.util.EnvironmentVariables;
 import org.apache.commons.io.FilenameUtils;
 
 public class Hooks {
-    private EnvironmentVariables environmentVariables;
+
     public static String scenarioName;
     public static String featureFullPath;
     public static String baseUrl;
@@ -15,6 +15,7 @@ public class Hooks {
     public static String username;
 
     public static String password;
+    private EnvironmentVariables environmentVariables;
 
     @Before
     public void BeforeScenario(Scenario scenario) {
@@ -22,7 +23,7 @@ public class Hooks {
         scenarioName = scenario.getName();
         System.out.println("Scenario name is " + scenarioName);
         featureFullPath = FilenameUtils.getFullPath(scenario.getUri().toString());
-
+        
         baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("webdriver.base.url");
 
