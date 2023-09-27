@@ -1,0 +1,96 @@
+headless.mode = true
+autodownload = false
+webdriver.chrome.driver = src/test/resources/webdrivers/chromedriver.exe
+#webdriver.edge.driver = src/test/resources/webdrivers/msedgedriver.exe
+
+serenity {
+    #take.screenshots = FOR_FAILURES
+    take.screenshots = BEFORE_AND_AFTER_EACH_STEP
+}
+
+
+#
+# Chrome options can be defined using the chrome.switches property
+#I turn off incognito mode so I don't need to login myself
+
+#chrome.switches = """--start-maximized;--test-type;--no-sandbox;--ignore-certificate-errors;
+#                   --disable-popup-blocking;--disable-default-apps;--disable-extensions-file-access-check;
+#                   --disable-infobars,--disable-gpu;--disk-cache-size=0;--headless=new"""
+#
+#chrome.switches = """--start-maximized;--test-type;--no-sandbox;--ignore-certificate-errors;
+#                   --disable-popup-blocking;--disable-default-apps;--disable-extensions-file-access-check;
+#                   --incognito;--disable-infobars,--disable-gpu"""
+
+environments
+{
+    default {
+    username = Admin
+    password = admin123
+    webdriver {
+      driver = chrome
+      capabilities {
+                browserName = "chrome"
+                browserVersion = "116"
+                "e34:token":"xxxxxxxx-xxx-xx"
+                "goog:chromeOptions" {
+                            args = ["headless=new"]
+                        }
+                  }
+      password = admin123
+      autodownload = true
+      base.url = "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login"
+            }
+    }
+
+    dev {
+    username = Admin
+    password = admin123
+    webdriver {
+      driver = remote
+      remote.url = "https://seleniumbox.com/wd/hub"
+      base.url = "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login"
+      capabilities {
+          browserName = "chrome"
+          browserVersion = "116"
+          "e34:token":"xxxxxxxx-xxx-xx"
+          "goog:chromeOptions" {
+                                args = ["headless=new"]
+                               }
+            }
+        }
+    }
+
+    dev01 {
+    username = Admin
+    password = admin123
+    webdriver {
+      driver = remote
+      remote.url = "https://seleniumbox.com/wd/hub"
+      base.url = "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login"
+            }
+    }
+}
+
+#serenity.extension.packages=mol
+#drivers {
+#  windows {
+#    webdriver.chrome.driver = src/test/resources/webdrivers/chromedriver.exe
+#  }
+#  mac {
+#    webdriver.chrome.driver = src/test/resources/webdriver/mac/chromedriver
+#  }
+#  linux {
+#    webdriver.chrome.driver = src/test/resources/webdriver/linux/chromedriver
+#  }
+#}
+#headless.mode = false
+#
+#serenity {
+#    take.screenshots = FOR_FAILURES
+#}
+##
+## Chrome options can be defined using the chrome.switches property
+##
+#chrome.switches = """--start-maximized;--test-type;--no-sandbox;--ignore-certificate-errors;
+#                   --disable-popup-blocking;--disable-default-apps;--disable-extensions-file-access-check;
+#                   --incognito;--disable-infobars,--disable-gpu"""
