@@ -1,0 +1,44 @@
+# Użycie istniejącego obrazu kontenera z Ubuntu i JDK 17
+image: your-registry/your-ubuntu-jdk17-image:latest
+
+# Definicja etapów pipeline'a
+stages:
+  - setup
+  - test
+
+# Instalacja niezbędnych zależności, przeglądarki i ChromeDrivera
+setup-job:
+  stage: setup
+  script:
+    - apt-get update
+    - apt-get install -y wget unzip xvfb libxi6 libgconf-2-4 gpg maven
+    # Pobranie i zainstalowanie klucza GPG dla Google Chrome
+    - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg
+    # Dodanie repozytorium Google Chrome z odniesieniem do klucza GPG
+    - echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] https://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list
+    - apt-get update
+    # Instalacja Google Chrome
+    - apt-get install -y google-chrome-stable
+    # Pobranie i zainstalowanie ChromeDriver
+    - CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
+    - wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
+    - unzip /tmp/chromedriver.zip -d /usr/local/bin/
+    - rm /tmp/chromedriver.zip
+  artifacts:
+    paths:
+      - /usr/local/bin/chromedriver
+      - /usr/bin/google-chrome
+
+# Uruchomienie testów Selenium
+test-job:
+  stage: test
+  script:
+    - export DISPLAY=:99
+    - mvn clean install
+    - mvn test
+  dependencies:
+    - setup-job
+  artifacts:
+    when: always
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
