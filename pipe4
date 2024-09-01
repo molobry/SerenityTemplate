@@ -1,0 +1,60 @@
+# Użycie istniejącego obrazu kontenera z Ubuntu i JDK 17 (można pominąć, jeśli instalujemy JDK w kroku setup)
+image: your-registry/your-ubuntu-jdk17-image:latest
+
+# Definicja etapów pipeline'a
+stages:
+  - setup
+  - test
+
+# Instalacja niezbędnych zależności, przeglądarki, ChromeDrivera, Mavena i OpenJDK 17
+setup-job:
+  stage: setup
+  script:
+    - apt-get update
+    - apt-get install -y wget unzip xvfb libxi6 libgconf-2-4 gpg curl
+    # Instalacja OpenJDK 17
+    - apt-get install -y openjdk-17-jdk
+    # Sprawdzenie zainstalowanej wersji JDK
+    - java -version
+    # Pobranie i zainstalowanie klucza GPG dla Google Chrome
+    - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg
+    # Dodanie repozytorium Google Chrome z odniesieniem do klucza GPG
+    - echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] https://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list
+    - apt-get update
+    # Instalacja Google Chrome
+    - apt-get install -y google-chrome-stable
+    # Sprawdzenie zainstalowanej wersji Google Chrome
+    - google-chrome --version
+    # Pobranie i zainstalowanie ChromeDriver
+    - CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
+    - wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
+    - unzip /tmp/chromedriver.zip -d /usr/local/bin/
+    - rm /tmp/chromedriver.zip
+    # Instalacja Mavena
+    - MAVEN_VERSION=3.8.7
+    - wget https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz
+    - tar xzvf apache-maven-$MAVEN_VERSION-bin.tar.gz -C /opt/
+    - ln -s /opt/apache-maven-$MAVEN_VERSION /opt/maven
+    - ln -s /opt/maven/bin/mvn /usr/bin/mvn
+    # Sprawdzenie zainstalowanej wersji Mavena
+    - mvn --version
+  artifacts:
+    paths:
+      - /usr/local/bin/chromedriver
+      - /usr/bin/google-chrome
+      - /opt/maven
+      - /usr/bin/mvn
+
+# Uruchomienie testów Selenium
+test-job:
+  stage: test
+  script:
+    - export DISPLAY=:99
+    - mvn clean install
+    - mvn test
+  dependencies:
+    - setup-job
+  artifacts:
+    when: always
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
