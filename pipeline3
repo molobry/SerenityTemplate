@@ -1,0 +1,39 @@
+# Your pipeline configuration
+image: your-registry/your-ubuntu-jdk17-image:latest
+
+stages:
+  - setup
+  - test
+
+setup-job:
+  stage: setup
+  script:
+    # Update package list and ensure Google repository is configured
+    - apt-get update
+    # Remove the old version of Chrome if necessary (optional but recommended)
+    - apt-get remove -y google-chrome-stable
+    # Add Google's official key for the latest Chrome version
+    - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg
+    # Ensure the Google Chrome repository is added and linked with the GPG key
+    - echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] https://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list
+    # Update the package list to refresh with the latest Google repository data
+    - apt-get update
+    # Install the latest version of Chrome
+    - apt-get install -y google-chrome-stable
+    # Verify the installed version of Chrome
+    - google-chrome --version
+  artifacts:
+    paths:
+      - /usr/bin/google-chrome
+
+test-job:
+  stage: test
+  script:
+    - mvn clean install
+    - mvn test
+  dependencies:
+    - setup-job
+  artifacts:
+    when: always
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
