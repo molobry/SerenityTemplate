@@ -1,0 +1,56 @@
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.devtools.DevTools;
+import org.openqa.selenium.devtools.v131.browser.Browser;
+import org.openqa.selenium.devtools.v131.page.Page;
+import org.openqa.selenium.devtools.v131.page.model.DownloadProgress;
+import org.openqa.selenium.devtools.v131.page.model.DownloadWillBegin;
+
+import java.nio.file.Paths;
+import java.util.Optional;
+
+public class HeadlessDownloadExample {
+    public static void main(String[] args) {
+        // Set your ChromeDriver path if needed
+        System.setProperty("webdriver.chrome.driver", "/path/to/chromedriver");
+
+        // Download directory
+        String downloadFilepath = System.getProperty("user.dir") + "/downloads";
+
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless=new"); // or "--headless=chrome" in recent versions
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
+        options.addArguments("--no-sandbox");
+
+        // Enable automatic downloads via DevTools
+        ChromeDriver driver = new ChromeDriver(options);
+        DevTools devTools = driver.getDevTools();
+        devTools.createSession();
+
+        // Tell Chrome where to download
+        devTools.send(Page.setDownloadBehavior(
+                Page.SetDownloadBehaviorBehavior.ALLOW,
+                Optional.empty(),
+                Optional.of(Paths.get(downloadFilepath).toAbsolutePath().toString()),
+                Optional.of(true)
+        ));
+
+        // (Optional) listen for download events
+        devTools.addListener(Page.downloadWillBegin(), (DownloadWillBegin event) -> {
+            System.out.println("Download started: " + event.getUrl());
+        });
+
+        devTools.addListener(Page.downloadProgress(), (DownloadProgress progress) -> {
+            System.out.println("Progress: " + progress.getState());
+        });
+
+        // Now open a page that triggers download
+        driver.get("https://example.com/download-file.zip");
+
+        // Wait or verify file existence manually here
+        // ...
+
+        driver.quit();
+    }
+}
